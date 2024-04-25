@@ -15,11 +15,55 @@ from generate import GENERATE
 import random
 
 
-with open("brown_vocab_100.txt") as vocab:
-    #load the indices dictionary
-    word_index_dict = {}
-    for i, line in enumerate(vocab):
-        word_index_dict[line.rstrip()] = i
+vocab = open("brown_vocab_100.txt")
+
+#load the indices dictionary
+word_index_dict = {}
+for i, line in enumerate(vocab):
+    #TODO: import part 1 code to build dictionary
+    line = line.rstrip('\n')
+    word_index_dict[line] = i
+
+f = open("brown_100.txt")
+
+counts = np.zeros(len(word_index_dict))
+
+for line in f:
+    sentence = line.rstrip('\n').split()
+    for word in sentence:
+        if word.lower() in word_index_dict:
+            counts[word_index_dict[word.lower()]] += 1
+
+f.close()
+
+#TODO: normalize and writeout counts. 
+probs = counts / np.sum(counts)
+
+
+word_prob_map = {}
+for word, prob in zip(word_index_dict.keys(), probs):
+    word_prob_map[word] = prob
+
+print(word_prob_map)
+
+# Open toy_corpus.txt
+corpus = open("toy_corpus.txt")
+
+# Calculate probability for each line in the corpus
+line_index = 0
+for line in corpus:
+    sentence = line.rstrip('\n').split()
+    sentence_prob = 1.0
+    for word in sentence:
+        if word.lower() in word_prob_map:
+            sentence_prob *= word_prob_map[word.lower()]
+    print("Probability for line", line_index, ":", sentence_prob)
+    sent_len = len(sentence)
+    perplexity = 1 / (pow(sentence_prob, 1.0 / sent_len))
+    print("Perplexity for line", line_index, ":", perplexity)
+    line_index += 1
+
+corpus.close()
 
 # ========== Bigram model ==========
 with open("brown_100.txt") as f:
