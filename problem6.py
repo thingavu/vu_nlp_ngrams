@@ -20,50 +20,38 @@ vocab = open("brown_vocab_100.txt")
 #load the indices dictionary
 word_index_dict = {}
 for i, line in enumerate(vocab):
-    #TODO: import part 1 code to build dictionary
     line = line.rstrip('\n')
     word_index_dict[line] = i
 
-f = open("brown_100.txt")
+# =========== Unigram model ===========
+with open("brown_100.txt") as f:
+    counts = np.zeros(len(word_index_dict))
+    for line in f:
+        sentence = line.rstrip('\n').split()
+        for word in sentence:
+            if word.lower() in word_index_dict:
+                counts[word_index_dict[word.lower()]] += 1
 
-counts = np.zeros(len(word_index_dict))
-
-for line in f:
-    sentence = line.rstrip('\n').split()
-    for word in sentence:
-        if word.lower() in word_index_dict:
-            counts[word_index_dict[word.lower()]] += 1
-
-f.close()
-
-#TODO: normalize and writeout counts. 
 probs = counts / np.sum(counts)
-
-
 word_prob_map = {}
 for word, prob in zip(word_index_dict.keys(), probs):
     word_prob_map[word] = prob
 
-print(word_prob_map)
+perplexities = []
+with open("toy_corpus.txt") as corpus:
+    # Calculate probability for each line in the corpus
+    for line in corpus:
+        sentence = line.rstrip('\n').split()
+        sentence_prob = 1.0
+        for word in sentence:
+            if word.lower() in word_prob_map:
+                sentence_prob *= word_prob_map[word.lower()]
+        sent_len = len(sentence)
+        perplexity = 1 / (pow(sentence_prob, 1.0 / sent_len))
+        perplexities.append(perplexity)
 
-# Open toy_corpus.txt
-corpus = open("toy_corpus.txt")
-
-# Calculate probability for each line in the corpus
-line_index = 0
-for line in corpus:
-    sentence = line.rstrip('\n').split()
-    sentence_prob = 1.0
-    for word in sentence:
-        if word.lower() in word_prob_map:
-            sentence_prob *= word_prob_map[word.lower()]
-    print("Probability for line", line_index, ":", sentence_prob)
-    sent_len = len(sentence)
-    perplexity = 1 / (pow(sentence_prob, 1.0 / sent_len))
-    print("Perplexity for line", line_index, ":", perplexity)
-    line_index += 1
-
-corpus.close()
+with codecs.open("unigram_eval.txt", "w", encoding="utf-8") as out_file:
+    out_file.write(f'\n'.join([str(p) for p in perplexities]))       
 
 # ========== Bigram model ==========
 with open("brown_100.txt") as f:
