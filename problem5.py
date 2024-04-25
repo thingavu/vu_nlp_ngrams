@@ -55,8 +55,8 @@ for i in range(vocab_size):
 
         total_count = np.sum(counts_w_apla[i, j, :])
         if total_count > 0:
-            probabilities_w_smooth[i, j, :] = counts_w_apla[i, j, :] / total_count            
-
+            probabilities_w_smooth[i, j, :] = counts_w_apla[i, j, :] / total_count
+                          
 trigram_contexts = [
     ("in", "the", "past"),
     ("in", "the", "time"),
