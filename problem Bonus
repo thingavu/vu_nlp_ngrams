@@ -1,0 +1,40 @@
+
+# Read the contents of the brown_100.txt file
+with open('brown_100.txt', 'r') as file:
+    text = file.read()
+
+# Tokenize the text into individual words
+words = text.split(" ")
+
+# Count the frequency of each word in the corpus
+word_freq = {}
+for word in words:
+    if word in word_freq:
+        word_freq[word] += 1
+    else:
+        word_freq[word] = 1
+
+# Calculate the PMI for each successive word pair
+pmi_scores = []
+for i in range(len(words) - 1):
+    w1, w2 = words[i], words[i + 1]
+    if word_freq[w1] >= 10 and word_freq[w2] >= 10:
+        pmi = nltk.collocations.BigramAssocMeasures().pmi(word_freq[w1], word_freq[w2], word_freq[w1 + ' ' + w2], len(words))
+        pmi_scores.append((w1, w2, pmi))
+
+# Sort the word pairs based on their PMI values
+pmi_scores.sort(key=lambda x: x[2], reverse=True)
+
+# Output the top 20 word pairs with the highest PMI values
+top_20 = pmi_scores[:20]
+
+# Output the bottom 20 word pairs with the lowest PMI values
+bottom_20 = pmi_scores[-20:]
+
+print("Top 20 word pairs with highest PMI:")
+for pair in top_20:
+    print(pair[0], pair[1], pair[2])
+
+print("\nBottom 20 word pairs with lowest PMI:")
+for pair in bottom_20:
+    print(pair[0], pair[1], pair[2])
