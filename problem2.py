@@ -9,7 +9,6 @@ DO NOT SHARE/DISTRIBUTE SOLUTIONS WITHOUT THE INSTRUCTOR'S PERMISSION
 """
 
 import numpy as np
-from generate import GENERATE
 import numpy as np
 from problem1 import get_word_index_dict
 

@@ -10,9 +10,6 @@ DO NOT SHARE/DISTRIBUTE SOLUTIONS WITHOUT THE INSTRUCTOR'S PERMISSION
 
 import codecs
 import numpy as np
-from sklearn.preprocessing import normalize
-from generate import GENERATE
-import random
 from problem1 import get_word_index_dict
 
 #load the indices dictionary

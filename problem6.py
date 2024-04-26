@@ -9,10 +9,6 @@ DO NOT SHARE/DISTRIBUTE SOLUTIONS WITHOUT THE INSTRUCTOR'S PERMISSION
 """
 
 import codecs
-import numpy as np
-from sklearn.preprocessing import normalize
-from generate import GENERATE
-import random
 from problem1 import get_word_index_dict
 from problem2 import unigram_model
 from problem3 import bigram_model
@@ -52,7 +48,7 @@ with codecs.open("toy_corpus.txt") as f:
         previous_word = '<s>'
         sentprob = 1
         valid_transitions = 0
-        for word in words:
+        for word in words[1:]:
             if word.lower() in word_index_dict and previous_word.lower() in word_index_dict:
                 sentprob *= probabilities[word_index_dict[previous_word.lower()], word_index_dict[word.lower()]]
                 valid_transitions += 1
@@ -74,7 +70,7 @@ with codecs.open("toy_corpus.txt") as f:
         previous_word = '<s>'
         sentprob = 1
         valid_transitions = 0
-        for word in words:
+        for word in words[1:]:
             if word.lower() in word_index_dict and previous_word.lower() in word_index_dict:
                 sentprob *= probabilities[word_index_dict[previous_word.lower()], word_index_dict[word.lower()]]
                 valid_transitions += 1
@@ -83,6 +79,6 @@ with codecs.open("toy_corpus.txt") as f:
         perplexity = 1/pow(sentprob, 1.0/valid_transitions)
         perplexities.append(perplexity)
 
-with codecs.open("smoothed_eval.txt", "w", encoding="utf-8") as out_file:
+with codecs.open("bigram_smoothed_eval.txt", "w", encoding="utf-8") as out_file:
     out_file.write(f'\n'.join([str(p) for p in perplexities]))
 
