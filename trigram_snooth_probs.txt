@@ -1,6 +1,0 @@
-p(past | in, the) = 0.01131
-p(time | in, the) = 0.00103
-p(said | the, jury) = 0.07529
-p(recommended | the, jury) = 0.02227
-p(that | jury, said) = 0.00112
-p(, | agriculture, teacher) = 0.01337

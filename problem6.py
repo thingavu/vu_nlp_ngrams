@@ -13,32 +13,21 @@ import numpy as np
 from sklearn.preprocessing import normalize
 from generate import GENERATE
 import random
+from problem1 import get_word_index_dict
+from problem2 import unigram_model
+from problem3 import bigram_model
+from problem4 import bigram_model_w_smoothing
 
-
-vocab = open("brown_vocab_100.txt")
-
-#load the indices dictionary
-word_index_dict = {}
-for i, line in enumerate(vocab):
-    line = line.rstrip('\n')
-    word_index_dict[line] = i
+word_index_dict = get_word_index_dict(vocab_path="brown_vocab_100.txt")
 
 # =========== Unigram model ===========
-with open("brown_100.txt") as f:
-    counts = np.zeros(len(word_index_dict))
-    for line in f:
-        sentence = line.rstrip('\n').split()
-        for word in sentence:
-            if word.lower() in word_index_dict:
-                counts[word_index_dict[word.lower()]] += 1
-
-probs = counts / np.sum(counts)
+counts, probs = unigram_model()
 word_prob_map = {}
 for word, prob in zip(word_index_dict.keys(), probs):
     word_prob_map[word] = prob
 
 perplexities = []
-with open("toy_corpus.txt") as corpus:
+with codecs.open("toy_corpus.txt") as corpus:
     # Calculate probability for each line in the corpus
     for line in corpus:
         sentence = line.rstrip('\n').split()
@@ -54,20 +43,10 @@ with codecs.open("unigram_eval.txt", "w", encoding="utf-8") as out_file:
     out_file.write(f'\n'.join([str(p) for p in perplexities]))       
 
 # ========== Bigram model ==========
-with open("brown_100.txt") as f:
-    counts = np.zeros((len(word_index_dict), len(word_index_dict)))
-    for line in f:
-        words = line.rstrip('\n').split()
-        previous_word = '<s>'  # start symbol
-        for word in words:
-            if word.lower() in word_index_dict and previous_word.lower() in word_index_dict:
-                counts[word_index_dict[previous_word.lower()], word_index_dict[word.lower()]] += 1
-            previous_word = word
-
-    probabilities = normalize(counts, norm='l1', axis=1)
+counts, probabilities = bigram_model()
 
 perplexities = []
-with open("toy_corpus.txt") as f:
+with codecs.open("toy_corpus.txt") as f:
     for line in f:
         words = line.rstrip().split()
         previous_word = '<s>'
@@ -86,24 +65,10 @@ with codecs.open("bigram_eval.txt", "w", encoding="utf-8") as out_file:
     out_file.write(f'\n'.join([str(p) for p in perplexities]))
 
 # ========== Bigram model with smooting ==========
-counts = np.zeros((len(word_index_dict), len(word_index_dict)))
-
-with open("brown_100.txt") as f:
-    for line in f:
-        words = line.rstrip().split()
-        previous_word = '<s>'
-        for word in words[1:]:
-            if word.lower() in word_index_dict and previous_word.lower() in word_index_dict:
-                counts[word_index_dict[previous_word.lower()], word_index_dict[word.lower()]] += 1
-            previous_word = word
-        
-alpha = 0.1
-counts += alpha
-
-probabilities = normalize(counts, norm='l1', axis=1)    
+counts, probabilities = bigram_model_w_smoothing()
 
 perplexities = []
-with open("toy_corpus.txt") as f:
+with codecs.open("toy_corpus.txt") as f:
     for line in f:
         words = line.rstrip('\n').split()
         previous_word = '<s>'
@@ -120,3 +85,4 @@ with open("toy_corpus.txt") as f:
 
 with codecs.open("smoothed_eval.txt", "w", encoding="utf-8") as out_file:
     out_file.write(f'\n'.join([str(p) for p in perplexities]))
+

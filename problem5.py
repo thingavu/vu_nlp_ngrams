@@ -13,67 +13,58 @@ import numpy as np
 from sklearn.preprocessing import normalize
 from generate import GENERATE
 import random
-
-
-vocab = codecs.open("brown_vocab_100.txt")
+from problem1 import get_word_index_dict
 
 #load the indices dictionary
-word_index_dict = {}
-for i, line in enumerate(vocab):
-    #TODO: import part 1 code to build dictionary
-    word_index_dict[line.rstrip()] = i
+#TODO: import part 1 code to build dictionary
+word_index_dict = get_word_index_dict(vocab_path="brown_vocab_100.txt")
 
-vocab.close()
+def trigram_model(smoothing=False):
+    out_file = "trigram_probs.txt"
+    if smoothing:
+        out_file = "trigram_smooth_probs.txt"
 
-f = codecs.open("brown_100.txt")
+    vocab_size = len(word_index_dict)
+    counts = np.zeros((vocab_size, vocab_size, vocab_size))
 
-vocab_size = len(word_index_dict)
-counts = np.zeros((vocab_size, vocab_size, vocab_size))
+    # Open the corpus file
+    with codecs.open("brown_100.txt", encoding='utf-8') as f:
+        for line in f:
+            words = line.strip().split()
+            for i in range(2, len(words)):
+                w1, w2, w3 = words[i-2].lower(), words[i-1].lower(), words[i].lower()
+                if w1 in word_index_dict and w2 in word_index_dict and w3 in word_index_dict:
+                    counts[word_index_dict[w1], word_index_dict[w2], word_index_dict[w3]] += 1
 
-# Open the corpus file
-f = codecs.open("brown_100.txt", encoding='utf-8')
+    if smoothing:
+        alpha = 0.1
+        counts += alpha
 
-for line in f:
-    words = line.strip().split()
-    for i in range(2, len(words)):
-        w1, w2, w3 = words[i-2].lower(), words[i-1].lower(), words[i].lower()
-        if w1 in word_index_dict and w2 in word_index_dict and w3 in word_index_dict:
-            counts[word_index_dict[w1], word_index_dict[w2], word_index_dict[w3]] += 1
-f.close()
+    probabilities = np.zeros((vocab_size, vocab_size, vocab_size))
 
-alpha = 0.1
-counts_w_apla = counts + alpha
+    for i in range(vocab_size):
+        for j in range(vocab_size):
+            total_count = np.sum(counts[i, j, :])
+            if total_count > 0:
+                probabilities[i, j, :] = counts[i, j, :] / total_count
 
-probabilities = np.zeros((vocab_size, vocab_size, vocab_size))
-probabilities_w_smooth = np.zeros((vocab_size, vocab_size, vocab_size))
+    trigram_contexts = [
+        ("in", "the", "past"),
+        ("in", "the", "time"),
+        ("the", "jury", "said"),
+        ("the", "jury", "recommended"),
+        ("jury", "said", "that"),
+        ("agriculture", "teacher", ",")
+    ]
 
-for i in range(vocab_size):
-    for j in range(vocab_size):
-        total_count = np.sum(counts[i, j, :])
-        if total_count > 0:
-            probabilities[i, j, :] = counts[i, j, :] / total_count
+    with codecs.open(out_file, "w", encoding="utf-8") as out_file:
+        for w1, w2, w3 in trigram_contexts:
+            index1, index2, index3 = word_index_dict[w1], word_index_dict[w2], word_index_dict[w3]
+            prob = probabilities[index1, index2, index3]
+            out_file.write(f'{prob:.7f}\n')
 
-        total_count = np.sum(counts_w_apla[i, j, :])
-        if total_count > 0:
-            probabilities_w_smooth[i, j, :] = counts_w_apla[i, j, :] / total_count
-                          
-trigram_contexts = [
-    ("in", "the", "past"),
-    ("in", "the", "time"),
-    ("the", "jury", "said"),
-    ("the", "jury", "recommended"),
-    ("jury", "said", "that"),
-    ("agriculture", "teacher", ",")
-]
+    return counts, probabilities
 
-with codecs.open("trigram_probs.txt", "w", encoding="utf-8") as out_file:
-    for w1, w2, w3 in trigram_contexts:
-        index1, index2, index3 = word_index_dict[w1], word_index_dict[w2], word_index_dict[w3]
-        prob = probabilities[index1, index2, index3]
-        out_file.write(f'p({w3} | {w1}, {w2}) = {prob:.5f}\n')
-
-with codecs.open("trigram_snooth_probs.txt", "w", encoding="utf-8") as out_file:
-    for w1, w2, w3 in trigram_contexts:
-        index1, index2, index3 = word_index_dict[w1], word_index_dict[w2], word_index_dict[w3]
-        prob = probabilities_w_smooth[index1, index2, index3]
-        out_file.write(f'p({w3} | {w1}, {w2}) = {prob:.5f}\n')
+if __name__ == '__main__':
+    trigram_model()
+    trigram_model(smoothing=True)
