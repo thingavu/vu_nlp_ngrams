@@ -30,6 +30,16 @@ def analyze_corpus(genre=None):
     print(f'Average word length: {avg_word_length:.2f}')
     print(f'Ten most frequent POS tags: {most_common_pos}')
 
+    # Write information to file
+    with open('problem0_information.txt', 'a') as file:
+        file.write(f'Genre: {genre if genre else "whole corpus"}\n')
+        file.write(f'Number of tokens: {num_tokens}\n')
+        file.write(f'Number of types: {num_types}\n')
+        file.write(f'Number of words: {num_words}\n')
+        file.write(f'Average number of words per sentence: {avg_words_per_sentence:.2f}\n')
+        file.write(f'Average word length: {avg_word_length:.2f}\n')
+        file.write(f'Ten most frequent POS tags: {most_common_pos}\n')
+
     # Plot frequency curves
     word_counts = Counter(words)
     sorted_word_counts = sorted(word_counts.values(), reverse=True)
@@ -53,3 +63,7 @@ analyze_corpus()
 # Analyze the chosen genres
 for genre in genres:
     analyze_corpus(genre)
+
+# Close the file
+with open('problem0_information.txt', 'a') as file:
+    file.close()
