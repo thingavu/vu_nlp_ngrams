@@ -30,4 +30,5 @@ def unigram_model():
     return counts,probs
 
 if __name__ == '__main__':
-    unigram_model()
+    counts,probs = unigram_model()
+    print(counts)
